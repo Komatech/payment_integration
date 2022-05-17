@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import *
 
-class Customer(serializers.ModelSerializer):
+class customer_serializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = [
@@ -11,7 +11,7 @@ class Customer(serializers.ModelSerializer):
             'telNo'
         ]
 
-class Product(serializers.ModelSerializer):
+class product_serializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
@@ -20,7 +20,7 @@ class Product(serializers.ModelSerializer):
             'price'
         ]
 
-class Sales(serializers.ModelSerializer):
+class sales_serializer(serializers.ModelSerializer):
     class Meta:
         model = Sales
         fields = [
