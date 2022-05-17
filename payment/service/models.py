@@ -15,8 +15,8 @@ class Product(models.Model):
     price = models.IntegerField()
 
 class Sales(models.Model):
-    customer_id = models.CharField()
-    product_id = models.CharField()
+    customer_id = models.CharField(max_length=250)
+    product_id = models.CharField(max_length=250)
     quantity = models.IntegerField()
     Amount = models.IntegerField()
-    pay_id = models.CharField()
+    pay_id = models.CharField(max_length=250)
