@@ -20,7 +20,7 @@ def create_customer(request):
             'message': 'Customer created successfully',
             'status': True,
             'data' : data,
-        },status=status.HTTP_200_OK)
+        },status=status.HTTP_201_CREATED)
     except:
         return Response({
             'messages': 'An error occured',
@@ -42,13 +42,23 @@ def create_product(request):
             'message': 'Product created successfully',
             'status': True,
             'data' : data,
-        },status=status.HTTP_200_OK)
+        },status=status.HTTP_400_BAD_REQUEST)
     except:
         return Response({
             'messages': 'An error occured',
             'status': False,
             'data' : [],
-        },status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        },status=status.HTTP_400_BAD_REQUEST)
 
     
     
+#                   Get/Read views
+@api_view(['GET'])
+def get_customers(request):
+    try:
+        customers = Customer.objects.all()
+        serializer = customer_serializer(customers,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+    except:
+        return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)

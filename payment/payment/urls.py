@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('NewCustomer/', views.create_customer),
     path('NewProduct/', views.create_product),
+    path('allCustomers/', views.get_customers),
 
 ]
