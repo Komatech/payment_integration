@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import *
 import requests
-import math,random,json
+import math,random
 from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 
@@ -124,7 +124,7 @@ def pay(request):
     )
     return Response({'message':'Payment processing',"link":link})
 
-    
+
 
 @api_view(['GET'])
 def callback(request):
