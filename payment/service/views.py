@@ -59,7 +59,7 @@ def customer_detail(request,pk):
 
 
 def process_payment(name,email,amount,phone):
-    auth_token= 'FLWSECK_TEST-423128379aba3f3d7f5e24ecab9273a5-X'
+    auth_token= SECRETKEY
     hed = {'Authorization': 'Bearer ' + auth_token}
     data = {
             "tx_ref":''+str(math.floor(1000000 + random.random()*9000000)),
@@ -89,7 +89,7 @@ def process_payment(name,email,amount,phone):
 
 
 def verify(transac):
-    auth_token= 'FLWSECK_TEST-423128379aba3f3d7f5e24ecab9273a5-X'
+    auth_token= SECRETKEY
     hed = {'Authorization': 'Bearer ' + auth_token}
     
     url = ' https://api.flutterwave.com/v3/transactions/'+transac+'/verify'
