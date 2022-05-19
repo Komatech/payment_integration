@@ -6,10 +6,6 @@ class customer_serializer(serializers.ModelSerializer):
         model = Customer
         fields = '__all__'
 
-class product_serializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = '__all__'
 
 class sales_serializer(serializers.ModelSerializer):
     class Meta:
