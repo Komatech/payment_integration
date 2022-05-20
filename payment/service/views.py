@@ -1,4 +1,3 @@
-import email
 from urllib import response
 from django.shortcuts import render
 from .models import *
@@ -6,12 +5,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import *
-import requests
-import math,random
+import requests,math,random
 from django.views.decorators.csrf import csrf_exempt
+SECRETKEY='FLWSECK_TEST-423128379aba3f3d7f5e24ecab9273a5-X'
 # Create your views here.
 
-#                   Create/Post views
+
+# An endpoint to create a customer.
 @api_view(['POST'])
 @csrf_exempt
 def create_customer(request):
@@ -35,7 +35,7 @@ def create_customer(request):
         },status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     
-#                   Get/Read views
+# An endpoint to fetch all the customers.
 @api_view(['GET'])
 def get_customers(request):
     try:
@@ -46,18 +46,33 @@ def get_customers(request):
     except:
         return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
 
-
+# An endpoint to fetch a single customer and all the payments made by the customer.
 @api_view(['GET'])
 def customer_detail(request,pk):
+    # try:
     try:
         customers = Customer.objects.get(id=pk)
-        serializer = customer_serializer(customers,many=False)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-
+        customer_data = customer_serializer(customers,many=False)
+        
+        payments = Sales.objects.filter(customer_id=customers)
+        
+        if len(payments) == 0:
+            customer_payment = {"data":"Customer has no payments"}
+            
+        else:
+            customer_payment = sales_serializer(payments,many=True).data
+            
+        data = {
+            "Customer Info":customer_data.data,
+            "Customer Payments":customer_payment
+        }
+        
+        return Response(data,status=status.HTTP_200_OK)
     except:
-        return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message":"Customer doesn't exist"},status=status.HTTP_400_BAD_REQUEST) 
+        
 
-
+# payment function
 def process_payment(name,email,amount,phone):
     auth_token= SECRETKEY
     hed = {'Authorization': 'Bearer ' + auth_token}
@@ -73,11 +88,7 @@ def process_payment(name,email,amount,phone):
                 "phonenumber":phone,
                 "name":name
             },
-            "customizations":{
-                "title":"Test Charge",
-                "description":"First try"
-                # "logo":"https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
-            }
+            
             }
     url = ' https://api.flutterwave.com/v3/payments'
     response = requests.post(url, json=data, headers=hed)
@@ -87,20 +98,18 @@ def process_payment(name,email,amount,phone):
     # print(data)
     return data
 
-
+# verification function
 def verify(transac):
     auth_token= SECRETKEY
     hed = {'Authorization': 'Bearer ' + auth_token}
     
     url = ' https://api.flutterwave.com/v3/transactions/'+transac+'/verify'
     response = requests.get(url,headers=hed)
-    # print(response)
     response=response.json()
-    print(response)
     return response
 
 
-
+# An endpoint to charge a customer’s card and pass the card details to Flutterwave for processing
 @api_view(['POST'])
 @csrf_exempt
 def pay(request):
@@ -122,24 +131,31 @@ def pay(request):
         amount = amount,
         pay_id = pay_id
     )
-    return Response({'message':'Payment processing',"link":link})
+    return Response({'message':'Payment processing',"link":link},status=status.HTTP_200_OK)
 
 
-
+# Confirmation endpoint
 @api_view(['GET'])
 def callback(request):
-    payload = request.GET
-    status = payload['status']
-    ref_id = payload['tx_ref']
-    transac_id = payload['transaction_id']
 
-    transaction = Sales.objects.filter(pay_id=ref_id)
-    verification = verify(transac_id)
+    try:
+        payload = request.GET
+        status = payload['status']
+        ref_id = payload['tx_ref']
+        transac_id = payload['transaction_id']
 
-    if verification['status'] == 'success':
-        transaction.update(
-            status = 'approved',
-            transaction_id = transac_id
-        )
+        transaction = Sales.objects.filter(pay_id=ref_id)
+        verification = verify(transac_id)
 
-    return Response({"data":"Successful","status":status,"pay_id":ref_id,"payload":payload})
+        if verification['status'] == 'success':
+            transaction.update(
+                status = 'approved',
+                transaction_id = transac_id
+            )
+
+        return Response({"message":"Successful","status":status,"pay_id":ref_id,"payload":payload})
+
+    except:
+        return Response({"message":"Transaction failes"},status=status.HTTP_400_BAD_REQUEST)
+
+

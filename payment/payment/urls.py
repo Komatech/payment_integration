@@ -20,12 +20,12 @@ from service import views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('Create/Customer', views.create_customer),
+    path('Create/Customer', views.create_customer,name='create_customer'),
 
     path('Customers/', views.get_customers),
     path('Customer/<str:pk>', views.customer_detail),
 
-    path('pay/',views.pay),
-    path('callback/',views.callback),
+    path('pay/',views.pay,name='payment'),
+    path('callback/',views.callback,name='callback'),
 
 ]
